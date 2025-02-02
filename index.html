@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日文生字記憶練習</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+
+        .column {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            width: 30%;
+            box-sizing: border-box; /* 確保 padding 不會影響寬度 */
+        }
+
+        #chinese div, #words div, #hiragana div {
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 24px; /* 統一文字大小 */
+            text-align: center;
+            min-width: 100px;
+            flex: 1;
+            box-sizing: border-box; /* 確保 padding 不會影響寬度 */
+            margin: 5px 0; /* 增加間距 */
+        }
+
+        #words div.selected, #hiragana div.selected {
+            background-color: #a0d8ef;
+        }
+
+        #words div.matched, #hiragana div.matched {
+            background-color: orange;
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .category-selector {
+            margin-bottom: 20px;
+        }
+
+        .category-selector label {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>日文生字記憶練習</h1>
+    <div class="category-selector">
+        <label>
+            <input type="checkbox" name="category" value="動詞" checked> 動詞
+        </label>
+        <label>
+            <input type="checkbox" name="category" value="形容詞" checked> 形容詞
+        </label>
+        <label>
+            <input type="checkbox" name="category" value="名詞" checked> 名詞
+        </label>
+        <button id="start">開始練習</button>
+    </div>
+    <div class="container">
+        <div id="chinese" class="column">
+            <h2>中文解釋</h2>
+            <!-- 中文解釋會顯示在這裡 -->
+        </div>
+        <div id="words" class="column">
+            <h2>詞語</h2>
+            <!-- 詞語會顯示在這裡 -->
+        </div>
+        <div id="hiragana" class="column">
+            <h2>平假名</h2>
+            <!-- 平假名會顯示在這裡 -->
+        </div>
+    </div>
+    <button id="check">檢查答案</button>
+    <p id="result"></p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const words = [
+                { kanji: "働きます", hiragana: "はたらきます", chinese: "工作", category: "動詞" },
+                { kanji: "休みます", hiragana: "やすみます", chinese: "休息", category: "動詞" },
+                { kanji: "終わります", hiragana: "おわります", chinese: "結束", category: "動詞" },
+                { kanji: "起きます", hiragana: "おきます", chinese: "起床", category: "動詞" },
+                { kanji: "寝ます", hiragana: "ねます", chinese: "睡覺", category: "動詞" },
+                { kanji: "勉強します", hiragana: "べんきょうします", chinese: "念書", category: "動詞" },
+                { kanji: "行きます", hiragana: "いきます", chinese: "去", category: "動詞" },
+                { kanji: "帰ります", hiragana: "かえります", chinese: "回", category: "動詞" },
+                { kanji: "来ます", hiragana: "きます", chinese: "來", category: "動詞" },
+                { kanji: "飲みます", hiragana: "のみます", chinese: "喝", category: "動詞" },
+                // 更多詞語...
+            ];
+
+            document.getElementById('start').addEventListener('click', () => {
+                const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                    .map(input => input.value);
+                const filteredWords = words.filter(word => selectedCategories.includes(word.category));
+                displayWordsAndHiragana(filteredWords);
+            });
+
+            function getRandomWords(words, count) {
+                const shuffled = words.sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, count);
+            }
+
+            function displayWordsAndHiragana(filteredWords) {
+                const selectedWords = getRandomWords(filteredWords, 10);
+                const hiraganaList = selectedWords.map(word => word.hiragana);
+                const shuffledHiragana = hiraganaList.sort(() => 0.5 - Math.random());
+
+                const chineseDiv = document.getElementById('chinese');
+                const wordsDiv = document.getElementById('words');
+                const hiraganaDiv = document.getElementById('hiragana');
+
+                chineseDiv.innerHTML = '<h2>中文解釋</h2>';
+                wordsDiv.innerHTML = '<h2>詞語</h2>';
+                hiraganaDiv.innerHTML = '<h2>平假名</h2>';
+
+                selectedWords.forEach(word => {
+                    const chineseElement = document.createElement('div');
+                    chineseElement.textContent = word.chinese;
+                    chineseDiv.appendChild(chineseElement);
+
+                    const wordElement = document.createElement('div');
+                    wordElement.textContent = word.kanji;
+                    wordElement.dataset.hiragana = word.hiragana;
+                    wordsDiv.appendChild(wordElement);
+                });
+
+                shuffledHiragana.forEach(hiragana => {
+                    const hiraganaElement = document.createElement('div');
+                    hiraganaElement.textContent = hiragana;
+                    hiraganaDiv.appendChild(hiraganaElement);
+                });
+
+                addClickEvents();
+            }
+
+            function addClickEvents() {
+                const wordElements = document.querySelectorAll('#words div');
+                const hiraganaElements = document.querySelectorAll('#hiragana div');
+
+                let selectedWord = null;
+                let selectedHiragana = null;
+
+                wordElements.forEach(word => {
+                    word.addEventListener('click', () => {
+                        if (!word.classList.contains('matched')) {
+                            wordElements.forEach(w => w.classList.remove('selected'));
+                            word.classList.add('selected');
+                            selectedWord = word;
+                            checkMatch();
+                        }
+                    });
+                });
+
+                hiraganaElements.forEach(hiragana => {
+                    hiragana.addEventListener('click', () => {
+                        if (!hiragana.classList.contains('matched')) {
+                            hiraganaElements.forEach(h => h.classList.remove('selected'));
+                            hiragana.classList.add('selected');
+                            selectedHiragana = hiragana;
+                            checkMatch();
+                        }
+                    });
+                });
+
+                function checkMatch() {
+                    if (selectedWord && selectedHiragana) {
+                        if (selectedWord.dataset.hiragana === selectedHiragana.textContent) {
+                            document.getElementById('result').textContent = "正確！";
+                            selectedWord.classList.remove('selected');
+                            selectedHiragana.classList.remove('selected');
+                            selectedWord.classList.add('matched');
+                            selectedHiragana.classList.add('matched');
+                            selectedWord = null;
+                            selectedHiragana = null;
+                        } else {
+                            document.getElementById('result').textContent = "錯誤，請再試一次！";
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('check').addEventListener('click', () => {
+                const unmatchedWords = document.querySelectorAll('#words div:not(.matched)');
+                if (unmatchedWords.length === 0) {
+                    document.getElementById('result').textContent = "全部正確！太棒了！";
+                } else {
+                    document.getElementById('result').textContent = "還有未完成的配對哦！";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
