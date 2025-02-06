@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日文生字記憶練習</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .column {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            width: 45%;
+        }
+
+        #words, #hiragana, #memory-hiragana {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #words div, #hiragana div, #memory-hiragana div {
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 24px;
+            text-align: center;
+            min-width: 100px;
+            flex: 1;
+        }
+
+        #words div.selected, #hiragana div.selected {
+            background-color: #a0d8ef;
+        }
+
+        #words div.matched, #hiragana div.matched {
+            background-color: orange;
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .category-selector {
+            margin-bottom: 20px;
+        }
+
+        .category-selector label {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .mode-selector {
+            margin-bottom: 20px;
+        }
+
+        .mode-selector button {
+            margin: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>日文生字記憶練習</h1>
+    <div class="mode-selector">
+        <button id="mode-pair">配對模式</button>
+        <button id="mode-memory">記憶模式</button>
+    </div>
+
+    <!-- 配對模式 -->
+    <div id="pair-mode" class="hidden">
+        <div class="category-selector" id="category-selector">
+            <!-- 分類選項會動態生成在這裡 -->
+        </div>
+        <div class="container">
+            <div id="words" class="column">
+                <h2>詞語</h2>
+                <!-- 詞語會顯示在這裡 -->
+            </div>
+            <div id="hiragana" class="column">
+                <h2>平假名</h2>
+                <!-- 平假名會顯示在這裡 -->
+            </div>
+        </div>
+        <button id="check">檢查答案</button>
+        <p id="result"></p>
+    </div>
+
+    <!-- 記憶模式 -->
+    <div id="memory-mode" class="hidden">
+        <div class="category-selector" id="memory-category-selector">
+            <!-- 分類選項會動態生成在這裡 -->
+        </div>
+        <div class="container">
+            <div id="memory-hiragana" class="column">
+                <h2>平假名</h2>
+                <!-- 平假名會顯示在這裡 -->
+            </div>
+        </div>
+        <button id="reset-memory">重發</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const words = [
+                
+		{ kanji: "工作", hiragana: "はたらきます", category: "動詞" },
+		{ kanji: "休息", hiragana: "やすみます", category: "動詞" },
+		{ kanji: "結束", hiragana: "おわります", category: "動詞" },
+		{ kanji: "起床", hiragana: "おきます", category: "動詞" },
+		{ kanji: "睡覺", hiragana: "ねます", category: "動詞" },
+		{ kanji: "念書", hiragana: "べんきょうします", category: "動詞" },
+		{ kanji: "去", hiragana: "いきます", category: "動詞" },
+		{ kanji: "回", hiragana: "かえります", category: "動詞" },
+		{ kanji: "來", hiragana: "きます", category: "動詞" },
+		{ kanji: "喝", hiragana: "のみます", category: "動詞" },
+		{ kanji: "吸（煙）", hiragana: "すいます", category: "動詞" },
+		{ kanji: "聽", hiragana: "ききます", category: "動詞" },
+		{ kanji: "閱讀", hiragana: "よみます", category: "動詞" },
+		{ kanji: "書寫", hiragana: "かきます", category: "動詞" },
+		{ kanji: "購買", hiragana: "かいます", category: "動詞" },
+  { kanji: "拍攝", hiragana: "とります", category: "動詞" },
+  { kanji: "見面", hiragana: "あいます", category: "動詞" },
+  { kanji: "吃", hiragana: "たべます", category: "動詞" },
+  { kanji: "看", hiragana: "みます", category: "動詞" },
+  { kanji: "做", hiragana: "します", category: "動詞" },
+  { kanji: "切", hiragana: "きります", category: "動詞" },
+  { kanji: "寄", hiragana: "おくります", category: "動詞" },
+  { kanji: "得到", hiragana: "もらいます", category: "動詞" },
+  { kanji: "借給", hiragana: "かします", category: "動詞" },
+  { kanji: "學習", hiragana: "ならいます", category: "動詞" },
+  { kanji: "給", hiragana: "あげます", category: "動詞" },
+  { kanji: "借回來", hiragana: "かります", category: "動詞" },
+  { kanji: "教，告訴", hiragana: "おしえます", category: "動詞" },
+  { kanji: "打（電話）", hiragana: "かけます", category: "動詞" },
+  { kanji: "懂，明白", hiragana: "わかります", category: "動詞" },
+  { kanji: "有", hiragana: "あります", category: "動詞" },
+  { kanji: "有", hiragana: "います", category: "動詞" },
+  { kanji: "花費", hiragana: "かかります", category: "動詞" },
+  { kanji: "請假 （向公司）", hiragana: "やすみます", category: "動詞" },
+  { kanji: "玩", hiragana: "あそびます", category: "動詞" },
+  { kanji: "游泳", hiragana: "およぎます", category: "動詞" },
+  { kanji: "迎接", hiragana: "むかえます", category: "動詞" },
+  { kanji: "疲累", hiragana: "つかれます", category: "動詞" },
+  { kanji: "結婚", hiragana: "けっこんします", category: "動詞" },
+  { kanji: "買東西", hiragana: "かいものします", category: "動詞" },
+  { kanji: "吃飯", hiragana: "しょくじします", category: "動詞" },
+  { kanji: "散步", hiragana: "さんぽします", category: "動詞" },
+  { kanji: "關（空調）", hiragana: "けします", category: "動詞" },
+  { kanji: "趕快", hiragana: "いそぎます", category: "動詞" },
+  { kanji: "等", hiragana: "まちます", category: "動詞" },
+  { kanji: "拿", hiragana: "もちます", category: "動詞" },
+  { kanji: "取", hiragana: "とります", category: "動詞" },
+  { kanji: "幫忙", hiragana: "てつだいます", category: "動詞" },
+  { kanji: "叫", hiragana: "よびます", category: "動詞" },
+  { kanji: "說", hiragana: "はなします", category: "動詞" },
+  { kanji: "使用", hiragana: "つかいます", category: "動詞" },
+  { kanji: "坐", hiragana: "すわります", category: "動詞" },
+  { kanji: "站立", hiragana: "たちます", category: "動詞" },
+  { kanji: "進入", hiragana: "はいります", category: "動詞" },
+  { kanji: "下（雨）", hiragana: "ふります", category: "動詞" },
+  { kanji: "開（空調）", hiragana: "つけます", category: "動詞" },
+  { kanji: "開（門）", hiragana: "あけます", category: "動詞" },
+  { kanji: "閉（門）", hiragana: "しめます", category: "動詞" },
+  { kanji: "停止", hiragana: "とめます", category: "動詞" },
+  { kanji: "出示", hiragana: "みせます", category: "動詞" },
+  { kanji: "告訴", hiragana: "おしえます", category: "動詞" },
+  { kanji: "離開", hiragana: "でます", category: "動詞" },
+  { kanji: "復印", hiragana: "コピーします", category: "動詞" },
+  { kanji: "放置", hiragana: "おきます", category: "動詞" },
+  { kanji: "製造", hiragana: "つくります", category: "動詞" },
+  { kanji: "賣", hiragana: "うります", category: "動詞" },
+  { kanji: "知道", hiragana: "しります", category: "動詞" },
+  { kanji: "居住", hiragana: "すみます", category: "動詞" },
+  { kanji: "研究", hiragana: "けんきゅうします", category: "動詞" },
+  { kanji: "搭乘", hiragana: "のります", category: "動詞" },
+  { kanji: "拿出", hiragana: "だします", category: "動詞" },
+  { kanji: "領（錢）", hiragana: "おろします", category: "動詞" },
+  { kanji: "上（大學）", hiragana: "はいります", category: "動詞" },
+  { kanji: "推", hiragana: "おします", category: "動詞" },
+  { kanji: "喝", hiragana: "のみます", category: "動詞" },
+  { kanji: "下（電車）", hiragana: "おります", category: "動詞" },
+  { kanji: "轉乘", hiragana: "のりかえます", category: "動詞" },
+  { kanji: "淋", hiragana: "あびます", category: "動詞" },
+  { kanji: "放入", hiragana: "いれます", category: "動詞" },
+  { kanji: "畢業（大學）", hiragana: "でます", category: "動詞" },
+  { kanji: "開始", hiragana: "はじめます", category: "動詞" },
+  { kanji: "參觀", hiragana: "けんがくします", category: "動詞" },
+  { kanji: "打電話", hiragana: "でんわします", category: "動詞" },
+  { kanji: "遺失", hiragana: "なくします", category: "動詞" },
+  { kanji: "支付", hiragana: "はらいます", category: "動詞" },
+  { kanji: "歸還", hiragana: "かえします", category: "動詞" },
+  { kanji: "脫", hiragana: "ぬぎます", category: "動詞" },
+  { kanji: "帶，拿去", hiragana: "もって　いきます", category: "動詞" },
+  { kanji: "吃藥", hiragana: "のみます", category: "動詞" },
+  { kanji: "入浴", hiragana: "はいります", category: "動詞" },
+  { kanji: "記住", hiragana: "おぼえます", category: "動詞" },
+  { kanji: "忘記", hiragana: "わすれます", category: "動詞" },
+  { kanji: "出門", hiragana: "でかけます", category: "動詞" },
+  { kanji: "帶，拿來", hiragana: "もって　きます", category: "動詞" },
+  { kanji: "擔心", hiragana: "しんぱいします", category: "動詞" },
+  { kanji: "加班", hiragana: "ざんぎょうします", category: "動詞" },
+  { kanji: "出差", hiragana: "しゅっちょうします", category: "動詞" },
+  { kanji: "洗", hiragana: "あらいます", category: "動詞" },
+  { kanji: "彈奏", hiragana: "ひきます", category: "動詞" },
+  { kanji: "唱歌", hiragana: "うたいます", category: "動詞" },
+  { kanji: "能夠", hiragana: "できます", category: "動詞" },
+  { kanji: "收集", hiragana: "あつめます", category: "動詞" },
+  { kanji: "捨棄", hiragana: "すてます", category: "動詞" },
+  { kanji: "換", hiragana: "かえます", category: "動詞" },
+  { kanji: "駕駛", hiragana: "うんてんします", category: "動詞" },
+  { kanji: "預約", hiragana: "よやくします", category: "動詞" },
+  { kanji: "登，上", hiragana: "のぼります", category: "動詞" },
+  { kanji: "住 （酒店）", hiragana: "とまります", category: "動詞" },
+  { kanji: "變成", hiragana: "なります", category: "動詞" },
+  { kanji: "打掃", hiragana: "そうじします", category: "動詞" },
+  { kanji: "洗衣服", hiragana: "せんたくします", category: "動詞" },
+  { kanji: "需要", hiragana: "いります", category: "動詞" },
+  { kanji: "調查", hiragana: "しらべます", category: "動詞" },
+  { kanji: "修理", hiragana: "しゅうります", category: "動詞" },
+  { kanji: "覺得", hiragana: "おもいます", category: "動詞" },
+  { kanji: "說", hiragana: "いいます", category: "動詞" },
+  { kanji: "蠃", hiragana: "かちます", category: "動詞" },
+  { kanji: "有（慶典）", hiragana: "あります", category: "動詞" },
+  { kanji: "有用，派上用場", hiragana: "やくに　たちます", category: "動詞" },
+  { kanji: "轉動", hiragana: "うごきます", category: "動詞" },
+  { kanji: "輸", hiragana: "まけます", category: "動詞" },
+  { kanji: "辭職", hiragana: "やめます", category: "動詞" },
+  { kanji: "小心，注意", hiragana: "きを　つけます", category: "動詞" },
+  { kanji: "留學", hiragana: "りゅうがくします", category: "動詞" },
+  { kanji: "穿（鞋/褲）", hiragana: "はきます", category: "動詞" },
+  { kanji: "戴（帽）", hiragana: "かぶります", category: "動詞" },
+  { kanji: "穿（衫）", hiragana: "きます", category: "動詞" },
+  { kanji: "戴（眼鏡）", hiragana: "かけます", category: "動詞" },
+  { kanji: "出生", hiragana: "うまれます", category: "動詞" },
+  { kanji: "繫（領帶）", hiragana: "します", category: "動詞" },
+  { kanji: "問（老師）", hiragana: "ききます", category: "動詞" },
+  { kanji: "轉動", hiragana: "まわします", category: "動詞" },
+  { kanji: "拉", hiragana: "ひきます", category: "動詞" },
+  { kanji: "摸", hiragana: "さわります", category: "動詞" },
+  { kanji: "走（路）", hiragana: "あるきます", category: "動詞" },
+  { kanji: "過（橋）", hiragana: "わたります", category: "動詞" },
+  { kanji: "轉彎", hiragana: "まがります", category: "動詞" },
+  { kanji: "改變", hiragana: "かえます", category: "動詞" },
+  { kanji: "出來（零錢）", hiragana: "でます", category: "動詞" },
+  { kanji: "修理", hiragana: "なおします", category: "動詞" },
+  { kanji: "帶（某人）去", hiragana: "つれて　いきます", category: "動詞" },
+  { kanji: "送行", hiragana: "おくります", category: "動詞" },
+  { kanji: "給", hiragana: "くれます", category: "動詞" },
+  { kanji: "帶（某人）來", hiragana: "つれて　きます", category: "動詞" },
+  { kanji: "介紹", hiragana: "しょうかいします", category: "動詞" },
+  { kanji: "帶路", hiragana: "あんないします", category: "動詞" },
+  { kanji: "說明", hiragana: "せつめいします", category: "動詞" },
+  { kanji: "到逹", hiragana: "つきます", category: "動詞" },
+  { kanji: "增長", hiragana: "とります", category: "動詞" },
+  { kanji: "足夠", hiragana: "たります", category: "動詞" },
+  { kanji: "思考", hiragana: "かんがえます", category: "動詞" },
+
+
+
+
+
+
+
+
+
+
+		{ kanji: "大きい", hiragana: "おおきい", category: "形容詞" },
+                { kanji: "小さい", hiragana: "ちいさい", category: "形容詞" },
+                { kanji: "美しい", hiragana: "うつくしい", category: "形容詞" },
+                { kanji: "猫", hiragana: "ねこ", category: "名詞" },
+                { kanji: "犬", hiragana: "いぬ", category: "名詞" },
+                { kanji: "本", hiragana: "ほん", category: "名詞" },
+                { kanji: "車", hiragana: "くるま", category: "名詞" },
+                { kanji: "山", hiragana: "やま", category: "名詞" },
+                { kanji: "川", hiragana: "かわ", category: "名詞" },
+                { kanji: "空", hiragana: "そら", category: "名詞" },
+                { kanji: "花", hiragana: "はな", category: "名詞" },
+                { kanji: "木", hiragana: "き", category: "名詞" },
+                { kanji: "海", hiragana: "うみ", category: "名詞" },            ];
+
+            let currentMode = null;
+
+            // 獲取所有分類
+            const categories = [...new Set(words.map(word => word.category))];
+
+            // 動態生成分類選項
+            function generateCategorySelectors(containerId) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                categories.forEach(category => {
+                    const label = document.createElement('label');
+                    label.innerHTML = `
+                        <input type="checkbox" name="category" value="${category}" checked> ${category}
+                    `;
+                    container.appendChild(label);
+                });
+                const startButton = document.createElement('button');
+                startButton.id = 'start';
+                startButton.textContent = '開始練習';
+                container.appendChild(startButton);
+
+                // 綁定開始練習按鈕的點擊事件
+                startButton.addEventListener('click', () => {
+                    startPractice(containerId);
+                });
+            }
+
+            // 模式選擇
+            document.getElementById('mode-pair').addEventListener('click', () => {
+                currentMode = 'pair';
+                document.getElementById('pair-mode').classList.remove('hidden');
+                document.getElementById('memory-mode').classList.add('hidden');
+                generateCategorySelectors('category-selector');
+            });
+
+            document.getElementById('mode-memory').addEventListener('click', () => {
+                currentMode = 'memory';
+                document.getElementById('memory-mode').classList.remove('hidden');
+                document.getElementById('pair-mode').classList.add('hidden');
+                generateCategorySelectors('memory-category-selector');
+            });
+
+            // 開始練習
+            function startPractice(containerId) {
+                const selectedCategories = Array.from(document.querySelectorAll(`#${containerId} input[name="category"]:checked`))
+                    .map(input => input.value);
+
+                // 過濾出符合選擇分類的單字
+                let filteredWords = words.filter(word => selectedCategories.includes(word.category));
+
+                // 從符合分類的單字中隨機選取 10 個
+                const selectedWords = getRandomWords(filteredWords, 10);
+
+                if (currentMode === 'pair') {
+                    displayPairMode(selectedWords);
+                } else if (currentMode === 'memory') {
+                    displayMemoryMode(selectedWords);
+                }
+            }
+
+            // 配對模式顯示
+            function displayPairMode(selectedWords) {
+                const hiraganaList = selectedWords.map(word => word.hiragana);
+                const shuffledHiragana = hiraganaList.sort(() => 0.5 - Math.random());
+
+                const wordsDiv = document.getElementById('words');
+                const hiraganaDiv = document.getElementById('hiragana');
+
+                wordsDiv.innerHTML = '<h2>詞語</h2>';
+                hiraganaDiv.innerHTML = '<h2>平假名</h2>';
+
+                selectedWords.forEach(word => {
+                    const wordElement = document.createElement('div');
+                    wordElement.textContent = word.kanji;
+                    wordElement.dataset.hiragana = word.hiragana;
+                    wordsDiv.appendChild(wordElement);
+                });
+
+                shuffledHiragana.forEach(hiragana => {
+                    const hiraganaElement = document.createElement('div');
+                    hiraganaElement.textContent = hiragana;
+                    hiraganaDiv.appendChild(hiraganaElement);
+                });
+
+                addClickEvents();
+            }
+
+            // 記憶模式顯示
+            function displayMemoryMode(selectedWords) {
+                const memoryHiraganaDiv = document.getElementById('memory-hiragana');
+                memoryHiraganaDiv.innerHTML = '<h2>平假名</h2>';
+
+                selectedWords.forEach(word => {
+                    const hiraganaElement = document.createElement('div');
+                    hiraganaElement.textContent = word.hiragana;
+                    hiraganaElement.dataset.kanji = word.kanji;
+                    hiraganaElement.addEventListener('click', () => {
+                        hiraganaElement.textContent = word.kanji;
+                    });
+                    memoryHiraganaDiv.appendChild(hiraganaElement);
+                });
+            }
+
+            // 隨機選擇單字
+            function getRandomWords(words, count) {
+                const shuffled = words.sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, count);
+            }
+
+            // 添加點擊事件（配對模式）
+            function addClickEvents() {
+                const wordElements = document.querySelectorAll('#words div');
+                const hiraganaElements = document.querySelectorAll('#hiragana div');
+
+                let selectedWord = null;
+                let selectedHiragana = null;
+
+                wordElements.forEach(word => {
+                    word.addEventListener('click', () => {
+                        if (!word.classList.contains('matched')) {
+                            wordElements.forEach(w => w.classList.remove('selected'));
+                            word.classList.add('selected');
+                            selectedWord = word;
+                            checkMatch();
+                        }
+                    });
+                });
+
+                hiraganaElements.forEach(hiragana => {
+                    hiragana.addEventListener('click', () => {
+                        if (!hiragana.classList.contains('matched')) {
+                            hiraganaElements.forEach(h => h.classList.remove('selected'));
+                            hiragana.classList.add('selected');
+                            selectedHiragana = hiragana;
+                            checkMatch();
+                        }
+                    });
+                });
+
+                function checkMatch() {
+                    if (selectedWord && selectedHiragana) {
+                        if (selectedWord.dataset.hiragana === selectedHiragana.textContent) {
+                            document.getElementById('result').textContent = "正確！";
+                            selectedWord.classList.remove('selected');
+                            selectedHiragana.classList.remove('selected');
+                            selectedWord.classList.add('matched');
+                            selectedHiragana.classList.add('matched');
+                            selectedWord = null;
+                            selectedHiragana = null;
+                        } else {
+                            document.getElementById('result').textContent = "錯誤，請再試一次！";
+                        }
+                    }
+                }
+            }
+
+            // 檢查答案（配對模式）
+            document.getElementById('check').addEventListener('click', () => {
+                const unmatchedWords = document.querySelectorAll('#words div:not(.matched)');
+                if (unmatchedWords.length === 0) {
+                    document.getElementById('result').textContent = "全部正確！太棒了！";
+                } else {
+                    document.getElementById('result').textContent = "還有未完成的配對哦！";
+                }
+            });
+
+            // 重發（記憶模式）
+            document.getElementById('reset-memory').addEventListener('click', () => {
+                startPractice('memory-category-selector');
+            });
+        });
+    </script>
+</body>
+</html>
