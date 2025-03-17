@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日文生字記憶練習</title>
+    <link rel="stylesheet" href="styles.css"> <!-- 引入 CSS -->
+</head>
+<body>
+    <h1>日文生字記憶練習</h1>
+    <div class="mode-selector">
+        <button id="mode-pair">配對模式</button>
+        <button id="mode-memory">記憶模式</button>
+    </div>
+
+    <!-- 配對模式 -->
+    <div id="pair-mode" class="hidden">
+        <div class="category-selector" id="category-selector">
+            <!-- 分類選項會動態生成在這裡 -->
+        </div>
+        <div class="container">
+            <div id="words" class="column">
+                <h2>詞語</h2>
+                <!-- 詞語會顯示在這裡 -->
+            </div>
+            <div id="hiragana" class="column">
+                <h2>平假名</h2>
+                <!-- 平假名會顯示在這裡 -->
+            </div>
+        </div>
+        <button id="check">檢查答案</button>
+        <p id="result"></p>
+    </div>
+
+    <!-- 記憶模式 -->
+    <div id="memory-mode" class="hidden">
+        <div id="word-selection">
+            <h2>詞語選擇</h2>
+            <p>請選擇最多 30 個詞語：</p>
+            <div id="word-selection-list">
+                <!-- 詞語選擇卡片會動態生成在這裡 -->
+            </div>
+            <button id="confirm-selection">確認選擇</button>
+        </div>
+        <div class="category-selector" id="memory-category-selector" class="hidden">
+            <!-- 分類選項會動態生成在這裡 -->
+        </div>
+        <div class="container">
+            <div id="memory-hiragana-left" class="column">
+                <h2>平假名（左）</h2>
+                <!-- 左欄平假名會顯示在這裡 -->
+            </div>
+            <div id="memory-hiragana-right" class="column">
+                <h2>平假名（右）</h2>
+                <!-- 右欄平假名會顯示在這裡 -->
+            </div>
+        </div>
+        <button id="reset-memory">重發</button>
+    </div>
+
+    <!-- 引入 JavaScript -->
+    <script src="words.js"></script> <!-- 引入詞語資料 -->
+    <script src="main.js"></script>  <!-- 引入主邏輯 -->
+</body>
+</html>
