@@ -128,8 +128,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedCategories = Array.from(document.querySelectorAll(`#${containerId} input[name="category"]:checked`))
             .map(input => input.value);
 
+        // 顯示已選擇的分類（可選）
+        const selectedCategoriesElement = document.getElementById('selected-categories');
+        if (selectedCategoriesElement) {
+            selectedCategoriesElement.textContent = selectedCategories.join(', ');
+        }
+
         // 過濾出符合選擇分類的單字
-        let filteredWords = currentMode === 'memory' ? selectedWordsForMemory : words.filter(word => selectedCategories.includes(word.category));
+        let filteredWords;
+        if (currentMode === 'memory') {
+            // 在記憶模式中，先從 selectedWordsForMemory 中過濾出符合分類的詞語
+            filteredWords = selectedWordsForMemory.filter(word => selectedCategories.includes(word.category));
+        } else {
+            // 在配對模式中，直接從所有詞語中過濾
+            filteredWords = words.filter(word => selectedCategories.includes(word.category));
+        }
+
+        // 如果過濾後的詞語不足 20 個，則顯示所有符合分類的詞語
+        if (filteredWords.length < 20) {
+            filteredWords = words.filter(word => selectedCategories.includes(word.category));
+        }
 
         // 從符合分類的單字中隨機選取 20 個
         const selectedWords = getRandomWords(filteredWords, 20);
