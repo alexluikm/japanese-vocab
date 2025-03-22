@@ -1,0 +1,223 @@
+/* 通用樣式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+    font-size: 24px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* index.html 樣式 */
+#course-selector {
+    margin-bottom: 20px;
+}
+
+#course-selector label {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+#word-selection-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 調整卡片寬度 */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.word-card {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px; /* 調整內邊距 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.word-card input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.word-card label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.word-card .kanji {
+    font-weight: bold;
+    font-size: 14px; /* 調整字體大小 */
+}
+
+.word-card .hiragana {
+    color: #555;
+    font-size: 12px; /* 調整字體大小 */
+}
+
+.word-card .category {
+    color: #888;
+    font-size: 10px; /* 調整字體大小 */
+}
+
+.word-card .course {
+    color: #666;
+    font-size: 10px; /* 調整字體大小 */
+}
+
+/* word-management.html 樣式 */
+#word-selection-list {
+    margin-bottom: 20px;
+}
+
+.word-card {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.word-card .kanji {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.word-card .hiragana {
+    color: #555;
+    font-size: 12px;
+}
+
+.word-card .category {
+    color: #888;
+    font-size: 10px;
+}
+
+.word-card .course {
+    color: #666;
+    font-size: 10px;
+}
+
+.word-card button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.word-card button:hover {
+    background-color: #45a049;
+}
+
+#add-word-form {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#add-word-form h2 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+#add-word-form input {
+    margin-right: 10px;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#add-word-form button {
+    padding: 5px 10px;
+    font-size: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#add-word-form button:hover {
+    background-color: #45a049;
+}
+
+#export-words, #back-to-index {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#export-words:hover, #back-to-index:hover {
+    background-color: #45a049;
+}
+
+/* 響應式設計：針對小屏幕設備（如手機） */
+@media (max-width: 600px) {
+    #word-selection-list {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* 手機上卡片更小 */
+    }
+
+    .word-card {
+        padding: 8px; /* 手機上內邊距更小 */
+    }
+
+    .word-card .kanji {
+        font-size: 12px; /* 手機上字體更小 */
+    }
+
+    .word-card .hiragana {
+        font-size: 10px; /* 手機上字體更小 */
+    }
+
+    .word-card .category {
+        font-size: 8px; /* 手機上字體更小 */
+    }
+
+    .word-card .course {
+        font-size: 8px; /* 手機上字體更小 */
+    }
+
+    #add-word-form input {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    #add-word-form button {
+        width: 100%;
+    }
+}

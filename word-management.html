@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>詞語維護</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 彈出式表單樣式 */
+        #add-modal, #edit-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: 80%; /* 調整寬度 */
+            max-width: 800px; /* 最大寬度 */
+            max-height: 80vh; /* 最大高度 */
+            overflow-y: auto; /* 啟用垂直滾動條 */
+        }
+
+        #add-modal h2, #edit-modal h2 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        #add-modal .form-row, #edit-modal .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #add-modal input, #edit-modal input {
+            flex: 1;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #add-modal button, #edit-modal button {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #add-modal button:hover, #edit-modal button:hover {
+            background-color: #45a049;
+        }
+
+        /* 遮罩層樣式 */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* 詞語卡片樣式 */
+        .word-card {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .word-card .kanji {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .word-card .hiragana {
+            color: #555;
+            font-size: 12px;
+        }
+
+        .word-card .category {
+            color: #888;
+            font-size: 10px;
+        }
+
+        .word-card .course {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .word-card .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .word-card .button-container button {
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .word-card .button-container button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>詞語維護</h1>
+
+    <!-- 新增詞語按鈕 -->
+    <button id="open-add-modal">新增詞語</button>
+
+    <!-- 詞語列表 -->
+    <div id="word-selection-list">
+        <!-- 詞語會動態生成在這裡 -->
+    </div>
+
+    <!-- 導出詞語 -->
+    <button id="export-words">導出詞語</button>
+
+    <!-- 返回主頁 -->
+    <button id="back-to-index">返回主頁</button>
+
+    <!-- 新增詞語彈出式表單 -->
+    <div id="add-modal">
+        <h2>新增詞語</h2>
+        <div id="add-form-container">
+            <!-- 表單會動態生成在這裡 -->
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="cancel-add">取消</button>
+            <button id="save-add">保存</button>
+            <button id="export-words-in-modal">導出詞語</button>
+        </div>
+    </div>
+
+    <!-- 編輯詞語彈出式表單 -->
+    <div id="edit-modal">
+        <h2>編輯詞語</h2>
+        <input type="text" id="edit-kanji" placeholder="漢字">
+        <input type="text" id="edit-hiragana" placeholder="平假名">
+        <input type="text" id="edit-category" placeholder="分類">
+        <input type="text" id="edit-course" placeholder="課程">
+        <button id="save-edit">保存</button>
+        <button id="cancel-edit">取消</button>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div id="overlay"></div>
+
+    <script src="words.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wordSelectionList = document.getElementById('word-selection-list');
+            const openAddModalButton = document.getElementById('open-add-modal');
+            const exportWordsButton = document.getElementById('export-words');
+            const backToIndexButton = document.getElementById('back-to-index');
+            const addModal = document.getElementById('add-modal');
+            const addFormContainer = document.getElementById('add-form-container');
+            const cancelAddButton = document.getElementById('cancel-add');
+            const saveAddButton = document.getElementById('save-add');
+            const exportWordsInModalButton = document.getElementById('export-words-in-modal');
+            const editModal = document.getElementById('edit-modal');
+            const editKanjiInput = document.getElementById('edit-kanji');
+            const editHiraganaInput = document.getElementById('edit-hiragana');
+            const editCategoryInput = document.getElementById('edit-category');
+            const editCourseInput = document.getElementById('edit-course');
+            const saveEditButton = document.getElementById('save-edit');
+            const cancelEditButton = document.getElementById('cancel-edit');
+            const overlay = document.getElementById('overlay');
+
+            let editingIndex = null; // 當前編輯的詞語索引
+
+            // 顯示詞語列表
+            function displayWords() {
+                wordSelectionList.innerHTML = '';
+                words.forEach((word, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'word-card';
+                    card.innerHTML = `
+                        <div>
+                            <div class="kanji">${word.kanji}</div>
+                            <div class="hiragana">${word.hiragana}</div>
+                            <div class="category">${word.category}</div>
+                            <div class="course">${word.course}</div>
+                        </div>
+                        <div class="button-container">
+                            <button class="edit-word" data-index="${index}">編輯</button>
+                            <button class="delete-word" data-index="${index}">刪除</button>
+                        </div>
+                    `;
+                    wordSelectionList.appendChild(card);
+                });
+
+                // 綁定編輯和刪除按鈕事件
+                bindEditAndDeleteButtons();
+            }
+
+            // 綁定編輯和刪除按鈕事件
+            function bindEditAndDeleteButtons() {
+                document.querySelectorAll('.edit-word').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = e.target.getAttribute('data-index');
+                        editWord(index);
+                    });
+                });
+
+                document.querySelectorAll('.delete-word').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = e.target.getAttribute('data-index');
+                        deleteWord(index);
+                    });
+                });
+            }
+
+            // 打開新增詞語彈出式表單
+            openAddModalButton.addEventListener('click', () => {
+                addFormContainer.innerHTML = ''; // 清空表單
+                for (let i = 0; i < 10; i++) {
+                    addFormContainer.innerHTML += `
+                        <div class="form-row">
+                            <input type="text" class="add-kanji" placeholder="漢字">
+                            <input type="text" class="add-hiragana" placeholder="平假名">
+                            <input type="text" class="add-category" placeholder="分類">
+                            <input type="text" class="add-course" placeholder="課程">
+                        </div>
+                    `;
+                }
+                addModal.style.display = 'block';
+                overlay.style.display = 'block';
+            });
+
+            // 保存新增詞語
+            saveAddButton.addEventListener('click', () => {
+                const rows = document.querySelectorAll('.form-row');
+                rows.forEach(row => {
+                    const kanji = row.querySelector('.add-kanji').value.trim();
+                    const hiragana = row.querySelector('.add-hiragana').value.trim();
+                    const category = row.querySelector('.add-category').value.trim();
+                    const course = row.querySelector('.add-course').value.trim();
+
+                    if (kanji && hiragana && category && course) {
+                        words.push({ kanji, hiragana, category, course });
+                    }
+                });
+
+                displayWords(); // 更新顯示
+                closeAddModal(); // 關閉彈出表單
+            });
+
+            // 取消新增詞語
+            cancelAddButton.addEventListener('click', () => {
+                closeAddModal();
+            });
+
+            // 導出詞語（在彈出式表單中）
+            exportWordsInModalButton.addEventListener('click', () => {
+                const data = `const words = ${JSON.stringify(words, null, 4)};\n`;
+                const blob = new Blob([data], { type: 'application/javascript' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'words.js';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // 導出詞語（在頁面中）
+            exportWordsButton.addEventListener('click', () => {
+                const data = `const words = ${JSON.stringify(words, null, 4)};\n`;
+                const blob = new Blob([data], { type: 'application/javascript' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'words.js';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // 關閉新增詞語彈出式表單
+            function closeAddModal() {
+                addModal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+
+            // 編輯詞語
+            function editWord(index) {
+                const word = words[index];
+                editKanjiInput.value = word.kanji;
+                editHiraganaInput.value = word.hiragana;
+                editCategoryInput.value = word.category;
+                editCourseInput.value = word.course;
+
+                // 設置當前編輯的索引
+                editingIndex = index;
+
+                // 顯示彈出式編輯表單和遮罩層
+                editModal.style.display = 'block';
+                overlay.style.display = 'block';
+            }
+
+            // 保存編輯
+            saveEditButton.addEventListener('click', () => {
+                const kanji = editKanjiInput.value.trim();
+                const hiragana = editHiraganaInput.value.trim();
+                const category = editCategoryInput.value.trim();
+                const course = editCourseInput.value.trim();
+
+                if (kanji && hiragana && category && course) {
+                    words[editingIndex] = { kanji, hiragana, category, course };
+                    displayWords();
+                    closeEditModal();
+                } else {
+                    alert("請填寫所有欄位！");
+                }
+            });
+
+            // 取消編輯
+            cancelEditButton.addEventListener('click', () => {
+                closeEditModal();
+            });
+
+            // 關閉編輯詞語彈出式表單
+            function closeEditModal() {
+                editModal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+
+            // 刪除詞語
+            function deleteWord(index) {
+                if (confirm("確定要刪除這個詞語嗎？")) {
+                    words.splice(index, 1);
+                    displayWords();
+                }
+            }
+
+            // 返回主頁
+            backToIndexButton.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+
+            // 初始化顯示詞語列表
+            displayWords();
+        });
+    </script>
+</body>
+</html>
