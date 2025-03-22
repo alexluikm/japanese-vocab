@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇詞語</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>選擇詞語</h1>
+    <p>請選擇最多 30 個詞語：</p>
+    <p>還可以選擇 <span id="counter">30</span> 個詞語</p>
+
+    <!-- 將按鈕移到頁面較高的位置 -->
+    <div id="button-container">
+        <button id="random-selection">隨機選擇</button>
+        <button id="confirm-selection">確認選擇</button>
+    </div>
+
+    <!-- 課程選擇器 -->
+    <div id="course-selector">
+        <label>選擇課程：</label>
+        <select id="course-filter">
+            <option value="全部">全部</option>
+            <!-- 課程選項會動態生成在這裡 -->
+        </select>
+    </div>
+
+    <div id="word-selection-list">
+        <!-- 詞語選擇卡片會動態生成在這裡 -->
+    </div>
+
+    <script src="words.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("頁面已加載！");
+
+            const wordSelectionList = document.getElementById('word-selection-list');
+            const counter = document.getElementById('counter');
+            const courseFilter = document.getElementById('course-filter');
+            let remaining = 30;
+
+            // 定義數字到中文課程名稱的映射
+            const numberToChinese = {
+                0: "零",
+                1: "一",
+                2: "二",
+                3: "三",
+                4: "四",
+                5: "五",
+                6: "六",
+                7: "七",
+                8: "八",
+                9: "九",
+                10: "十"
+            };
+
+            // 將數字轉換為中文課程名稱
+            function getCourseName(courseNumber) {
+                if (courseNumber <= 10) {
+                    return `第${numberToChinese[courseNumber]}課`;
+                } else if (courseNumber <= 19) {
+                    return `第十${numberToChinese[courseNumber % 10]}課`;
+                } else if (courseNumber === 20) {
+                    return "第二十課";
+                } else {
+                    return `第${numberToChinese[Math.floor(courseNumber / 10)]}十${numberToChinese[courseNumber % 10]}課`;
+                }
+            }
+
+            // 從 words.js 中提取所有課程
+            const courses = [...new Set(words.map(word => word.course))];
+
+            // 將課程按照數字順序排序
+            const sortedCourses = courses.sort((a, b) => parseInt(a) - parseInt(b));
+            console.log("排序後的課程：", sortedCourses); // 調試用
+
+            // 動態生成課程選項
+            function generateCourseOptions() {
+                sortedCourses.forEach(course => {
+                    const option = document.createElement('option');
+                    option.value = course; // 使用數字作為 value
+                    option.textContent = getCourseName(parseInt(course)); // 顯示中文課程名稱
+                    courseFilter.appendChild(option);
+                });
+
+                // 如果沒有課程，顯示提示
+                if (sortedCourses.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = "無課程";
+                    option.textContent = "無課程";
+                    courseFilter.appendChild(option);
+                }
+            }
+
+            // 生成詞語選擇卡片
+            function generateWordCards(filteredWords) {
+                wordSelectionList.innerHTML = ''; // 清空當前詞語列表
+                filteredWords.forEach(word => {
+                    const card = document.createElement('div');
+                    card.className = 'word-card';
+                    card.innerHTML = `
+                        <div>
+                            <input type="checkbox" id="${word.kanji}" value="${word.kanji}">
+                            <label for="${word.kanji}">
+                                <div class="kanji">${word.kanji}</div>
+                                <div class="hiragana">${word.hiragana}</div>
+                                <div class="category">${word.category}</div>
+                                <div class="course">${getCourseName(parseInt(word.course))}</div>
+                            </label>
+                        </div>
+                    `;
+                    wordSelectionList.appendChild(card);
+
+                    // 綁定選擇框的點擊事件
+                    const checkbox = card.querySelector('input[type="checkbox"]');
+                    checkbox.addEventListener('click', () => {
+                        if (checkbox.checked) {
+                            remaining -= 1;
+                        } else {
+                            remaining += 1;
+                        }
+                        counter.textContent = remaining;
+
+                        // 如果剩餘可選詞語為 0，禁用未選中的選擇框
+                        const checkboxes = document.querySelectorAll('#word-selection-list input[type="checkbox"]');
+                        checkboxes.forEach(cb => {
+                            if (remaining === 0 && !cb.checked) {
+                                cb.disabled = true;
+                            } else {
+                                cb.disabled = false;
+                            }
+                        });
+                    });
+                });
+            }
+
+            // 初始加載時顯示所有詞語
+            generateCourseOptions(); // 生成課程選項
+            generateWordCards(words); // 顯示所有詞語
+
+            // 課程選擇器事件
+            courseFilter.addEventListener('change', () => {
+                const selectedCourse = courseFilter.value;
+                let filteredWords = words;
+
+                if (selectedCourse !== "全部") {
+                    filteredWords = words.filter(word => word.course === selectedCourse);
+                }
+
+                // 重新生成詞語卡片
+                generateWordCards(filteredWords);
+
+                // 重置剩餘可選詞語數量
+                remaining = 30;
+                counter.textContent = remaining;
+
+                // 啟用所有選擇框
+                const checkboxes = document.querySelectorAll('#word-selection-list input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.disabled = false;
+                });
+            });
+
+            // 隨機選擇按鈕
+            document.getElementById('random-selection').addEventListener('click', () => {
+                const checkboxes = document.querySelectorAll('#word-selection-list input[type="checkbox"]');
+                let remainingWords = 30;
+
+                // 先取消所有已選中的詞語
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.disabled = false;
+                });
+
+                // 根據當前過濾的課程隨機選擇詞語
+                const selectedCourse = courseFilter.value;
+                let filteredWords = words;
+
+                if (selectedCourse !== "全部") {
+                    filteredWords = words.filter(word => word.course === selectedCourse);
+                }
+
+                // 隨機選擇最多 30 個詞語
+                const shuffledWords = filteredWords.sort(() => 0.5 - Math.random()).slice(0, 30);
+                shuffledWords.forEach(word => {
+                    const checkbox = document.querySelector(`#word-selection-list input[value="${word.kanji}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        remainingWords -= 1;
+                    }
+                });
+
+                // 更新剩餘可選詞語數量
+                remaining = remainingWords;
+                counter.textContent = remaining;
+
+                // 如果剩餘可選詞語為 0，禁用未選中的選擇框
+                checkboxes.forEach(cb => {
+                    if (remaining === 0 && !cb.checked) {
+                        cb.disabled = true;
+                    }
+                });
+
+                // 將隨機選擇的詞語存儲到 localStorage
+                const selectedWords = Array.from(document.querySelectorAll('#word-selection-list input[type="checkbox"]:checked'))
+                    .map(input => words.find(word => word.kanji === input.value));
+                localStorage.setItem('selectedWords', JSON.stringify(selectedWords));
+            });
+
+            // 確認選擇
+            document.getElementById('confirm-selection').addEventListener('click', () => {
+                const selectedWords = Array.from(document.querySelectorAll('#word-selection-list input[type="checkbox"]:checked'))
+                    .map(input => words.find(word => word.kanji === input.value));
+
+                if (selectedWords.length > 30) {
+                    alert("請選擇最多 30 個詞語！");
+                    return;
+                }
+
+                // 將選擇的詞語存儲到 localStorage
+                localStorage.setItem('selectedWords', JSON.stringify(selectedWords));
+                console.log("已存儲選擇的詞語：", selectedWords); // 調試用
+
+                // 跳轉到 memory-mode.html
+                window.location.href = 'memory-mode.html';
+            });
+        });
+    </script>
+</body>
+</html>
