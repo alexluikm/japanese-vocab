@@ -1,0 +1,119 @@
+/* 通用樣式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+    font-size: 24px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* 首頁卡片式樣式 */
+#word-selection-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 調整卡片寬度 */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.word-card {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px; /* 調整內邊距 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.word-card input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.word-card label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.word-card .kanji {
+    font-weight: bold;
+    font-size: 14px; /* 調整字體大小 */
+}
+
+.word-card .hiragana {
+    color: #555;
+    font-size: 12px; /* 調整字體大小 */
+}
+
+.word-card .category {
+    color: #888;
+    font-size: 10px; /* 調整字體大小 */
+}
+
+.word-card .course {
+    color: #666;
+    font-size: 10px; /* 調整字體大小 */
+}
+
+/* 記憶模式樣式 */
+.container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* 左右欄之間的間距 */
+    margin-top: 20px;
+}
+
+.column {
+    flex: 1; /* 讓左右欄平分寬度 */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.word-container {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.word-container:hover {
+    background-color: #f9f9f9;
+}
+
+.word-container button {
+    margin-top: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.word-container button.marked {
+    background-color: #f44336;
+}
